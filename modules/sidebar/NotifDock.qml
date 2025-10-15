@@ -16,7 +16,8 @@ Item {
 
     required property Props props
     required property var visibilities
-    readonly property int notifCount: Notifs.list.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
+    // OTIMIZAÇÃO: Usar Notifs.notClosed ao invés de iterar e filtrar manualmente
+    readonly property int notifCount: Notifs.notClosed.length
 
     anchors.fill: parent
     anchors.margins: Appearance.padding.normal

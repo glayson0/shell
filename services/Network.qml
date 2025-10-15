@@ -153,7 +153,13 @@ Singleton {
 
                 const rNetworks = root.networks;
 
-                const destroyed = rNetworks.filter(rn => !networks.find(n => n.frequency === rn.frequency && n.ssid === rn.ssid && n.bssid === rn.bssid));
+                // OTIMIZAÇÃO: Usar Map para lookup O(1) ao invés de nested find O(n²)
+                const networkKeys = new Map();
+                for (const n of networks) {
+                    networkKeys.set(`${n.frequency}-${n.ssid}-${n.bssid}`, n);
+                }
+                
+                const destroyed = rNetworks.filter(rn => !networkKeys.has(`${rn.frequency}-${rn.ssid}-${rn.bssid}`));
                 for (const network of destroyed)
                     rNetworks.splice(rNetworks.indexOf(network), 1).forEach(n => n.destroy());
 

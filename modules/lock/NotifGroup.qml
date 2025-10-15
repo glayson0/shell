@@ -16,10 +16,28 @@ StyledRect {
 
     required property string modelData
 
+    // OTIMIZAÇÃO: Uma única iteração ao invés de 4+ separadas
     readonly property list<var> notifs: Notifs.list.filter(notif => notif.appName === modelData)
-    readonly property string image: notifs.find(n => n.image.length > 0)?.image ?? ""
-    readonly property string appIcon: notifs.find(n => n.appIcon.length > 0)?.appIcon ?? ""
-    readonly property string urgency: notifs.some(n => n.urgency === NotificationUrgency.Critical) ? "critical" : notifs.some(n => n.urgency === NotificationUrgency.Normal) ? "normal" : "low"
+    readonly property var _cachedData: {
+        let img = "";
+        let icon = "";
+        let hasCritical = false;
+        let hasNormal = false;
+        
+        for (const n of notifs) {
+            if (!img && n.image.length > 0) img = n.image;
+            if (!icon && n.appIcon.length > 0) icon = n.appIcon;
+            if (!hasCritical && n.urgency === NotificationUrgency.Critical) hasCritical = true;
+            if (!hasNormal && n.urgency === NotificationUrgency.Normal) hasNormal = true;
+        }
+        
+        const urg = hasCritical ? "critical" : hasNormal ? "normal" : "low";
+        return {image: img, appIcon: icon, urgency: urg};
+    }
+    
+    readonly property string image: _cachedData.image
+    readonly property string appIcon: _cachedData.appIcon
+    readonly property string urgency: _cachedData.urgency
 
     property bool expanded
 
@@ -27,7 +45,8 @@ StyledRect {
     anchors.right: parent?.right
     implicitHeight: content.implicitHeight + Appearance.padding.normal * 2
 
-    clip: true
+    // OTIMIZAÇÃO: Clip apenas quando necessário
+    clip: content.implicitHeight !== implicitHeight
     radius: Appearance.rounding.normal
     color: root.urgency === "critical" ? Colours.palette.m3secondaryContainer : Colours.layer(Colours.palette.m3surfaceContainerHigh, 2)
 

@@ -13,9 +13,18 @@ Item {
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
 
+    // OTIMIZAÇÃO: Cálculo direto ao invés de filter + reduce
     readonly property int maxHeight: {
-        const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
-        const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
+        let otherHeight = 0;
+        let itemCount = 0;
+        
+        for (const child of bar.children) {
+            if (child.id && child.item !== this && child.id !== "spacer") {
+                otherHeight += child.item.nonAnimHeight ?? child.height;
+                itemCount++;
+            }
+        }
+        
         // Length - 2 cause repeater counts as a child
         return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
     }

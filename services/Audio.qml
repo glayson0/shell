@@ -13,18 +13,22 @@ Singleton {
     property string previousSinkName: ""
     property string previousSourceName: ""
 
-    readonly property var nodes: Pipewire.nodes.values.reduce((acc, node) => {
-        if (!node.isStream) {
-            if (node.isSink)
-                acc.sinks.push(node);
-            else if (node.audio)
-                acc.sources.push(node);
+    // OTIMIZAÇÃO: Uma única iteração ao invés de reduce + acesso separado
+    readonly property var nodes: {
+        const sinks = [];
+        const sources = [];
+        
+        for (const node of Pipewire.nodes.values) {
+            if (!node.isStream) {
+                if (node.isSink)
+                    sinks.push(node);
+                else if (node.audio)
+                    sources.push(node);
+            }
         }
-        return acc;
-    }, {
-        sources: [],
-        sinks: []
-    })
+        
+        return {sources: sources, sinks: sinks};
+    }
 
     readonly property list<PwNode> sinks: nodes.sinks
     readonly property list<PwNode> sources: nodes.sources

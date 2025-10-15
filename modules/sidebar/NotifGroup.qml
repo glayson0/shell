@@ -18,11 +18,35 @@ StyledRect {
     required property Flickable container
     required property var visibilities
 
+    // OTIMIZAÇÃO: Uma única iteração ao invés de 6+ separadas
     readonly property list<var> notifs: Notifs.list.filter(n => n.appName === modelData)
-    readonly property int notifCount: notifs.reduce((acc, n) => n.closed ? acc : acc + 1, 0)
-    readonly property string image: notifs.find(n => !n.closed && n.image.length > 0)?.image ?? ""
-    readonly property string appIcon: notifs.find(n => !n.closed && n.appIcon.length > 0)?.appIcon ?? ""
-    readonly property int urgency: notifs.some(n => !n.closed && n.urgency === NotificationUrgency.Critical) ? NotificationUrgency.Critical : notifs.some(n => n.urgency === NotificationUrgency.Normal) ? NotificationUrgency.Normal : NotificationUrgency.Low
+    readonly property var _cachedData: {
+        let count = 0;
+        let img = "";
+        let icon = "";
+        let urg = NotificationUrgency.Low;
+        let hasCritical = false;
+        let hasNormal = false;
+        
+        for (const n of notifs) {
+            if (!n.closed) {
+                count++;
+                if (!img && n.image.length > 0) img = n.image;
+                if (!icon && n.appIcon.length > 0) icon = n.appIcon;
+                if (!hasCritical && n.urgency === NotificationUrgency.Critical) hasCritical = true;
+                if (!hasNormal && n.urgency === NotificationUrgency.Normal) hasNormal = true;
+            }
+        }
+        
+        urg = hasCritical ? NotificationUrgency.Critical : hasNormal ? NotificationUrgency.Normal : NotificationUrgency.Low;
+        
+        return {count: count, image: img, appIcon: icon, urgency: urg};
+    }
+    
+    readonly property int notifCount: _cachedData.count
+    readonly property string image: _cachedData.image
+    readonly property string appIcon: _cachedData.appIcon
+    readonly property int urgency: _cachedData.urgency
 
     readonly property int nonAnimHeight: {
         const headerHeight = header.implicitHeight + (root.expanded ? Math.round(Appearance.spacing.small / 2) : 0);
@@ -49,7 +73,8 @@ StyledRect {
     anchors.right: parent?.right
     implicitHeight: content.implicitHeight + Appearance.padding.normal * 2
 
-    clip: true
+    // OTIMIZAÇÃO: Clip apenas quando necessário (durante animações)
+    clip: content.implicitHeight !== implicitHeight
     radius: Appearance.rounding.normal
     color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 

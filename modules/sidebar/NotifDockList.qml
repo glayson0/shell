@@ -28,13 +28,20 @@ Item {
         id: repeater
 
         model: ScriptModel {
+            // OTIMIZAÇÃO: Uma única iteração ao invés de duas + Map overhead
             values: {
-                const map = new Map();
-                for (const n of Notifs.notClosed)
-                    map.set(n.appName, null);
-                for (const n of Notifs.list)
-                    map.set(n.appName, null);
-                return [...map.keys()];
+                const seen = {};
+                const result = [];
+                
+                // Combinar ambas as listas em uma única iteração
+                const allNotifs = [...Notifs.notClosed, ...Notifs.list];
+                for (const n of allNotifs) {
+                    if (!seen[n.appName]) {
+                        seen[n.appName] = true;
+                        result.push(n.appName);
+                    }
+                }
+                return result;
             }
             onValuesChanged: root.flagChanged()
         }
