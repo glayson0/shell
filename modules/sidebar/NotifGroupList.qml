@@ -138,7 +138,8 @@ Item {
             Component.onDestruction: modelData.unlock(this)
 
             ParallelAnimation {
-                Component.onCompleted: running = !notif.previewHidden
+                // OTIMIZAÇÃO: Desabilitar se houver muitas notificações no grupo
+                Component.onCompleted: running = !notif.previewHidden && root.notifs.length < 15
 
                 Anim {
                     target: notif
@@ -181,14 +182,20 @@ Item {
             }
 
             Behavior on opacity {
+                // OTIMIZAÇÃO: enabled apenas se não estiver oculto
+                enabled: !notif.previewHidden
                 Anim {}
             }
 
             Behavior on scale {
+                // OTIMIZAÇÃO: enabled apenas se não estiver oculto
+                enabled: !notif.previewHidden
                 Anim {}
             }
 
             Behavior on x {
+                // OTIMIZAÇÃO: enabled apenas quando não está em drag
+                enabled: !notif.drag.active
                 Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -196,6 +203,8 @@ Item {
             }
 
             Behavior on y {
+                // OTIMIZAÇÃO: enabled apenas quando necessário
+                enabled: !notif.drag.active
                 Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial

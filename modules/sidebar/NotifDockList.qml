@@ -114,7 +114,8 @@ Item {
             }
 
             ParallelAnimation {
-                running: true
+                // OTIMIZAÇÃO: Desabilitar animação de entrada se houver muitas notificações
+                running: true && root.repeater.count < 10
 
                 Anim {
                     target: notif
@@ -157,6 +158,8 @@ Item {
             }
 
             Behavior on x {
+                // OTIMIZAÇÃO: enabled apenas quando necessário (não durante drag)
+                enabled: !notif.drag.active
                 Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -164,6 +167,8 @@ Item {
             }
 
             Behavior on y {
+                // OTIMIZAÇÃO: enabled apenas quando necessário
+                enabled: !notif.drag.active
                 Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial

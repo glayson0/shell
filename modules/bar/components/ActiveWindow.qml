@@ -56,7 +56,7 @@ Item {
         id: metrics
 
         text: Hypr.activeToplevel?.title ?? qsTr("Desktop")
-        font.pointSize: Appearance.font.size.smaller
+        font.pointSize: 10
         font.family: Appearance.font.family.mono
         elide: Qt.ElideRight
         elideWidth: root.maxHeight - icon.height

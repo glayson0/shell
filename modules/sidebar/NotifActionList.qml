@@ -19,7 +19,7 @@ Item {
     implicitHeight: flickable.contentHeight
 
     layer.enabled: true
-    layer.smooth: true
+    // OTIMIZAÇÃO: layer.smooth removido - não é necessário para máscaras simples
     layer.effect: OpacityMask {
         maskSource: gradientMask
     }
