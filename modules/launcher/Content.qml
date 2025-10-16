@@ -89,6 +89,10 @@ Item {
                             Wallpapers.previewColourLock = true;
                         Wallpapers.setWallpaper(currentItem.modelData.path);
                         root.visibilities.launcher = false;
+                    } else if (text.startsWith("td ")) {
+                        currentItem.onClicked();
+                    } else if (text.startsWith("$")) {
+                        currentItem.onClicked();
                     } else if (text.startsWith(Config.launcher.actionPrefix)) {
                         if (text.startsWith(`${Config.launcher.actionPrefix}calc `))
                             currentItem.onClicked();

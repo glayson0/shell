@@ -51,6 +51,15 @@ StyledListView {
     state: {
         const text = search.text;
         const prefix = Config.launcher.actionPrefix;
+        
+        // Check for todoist prefix "td"
+        if (text.startsWith("td "))
+            return "todoist";
+        
+        // Check for terminal prefix "$"
+        if (text.startsWith("$"))
+            return "terminal";
+        
         if (text.startsWith(prefix)) {
             for (const action of ["calc", "scheme", "variant"])
                 if (text.startsWith(`${prefix}${action} `))
@@ -106,6 +115,22 @@ StyledListView {
             PropertyChanges {
                 model.values: M3Variants.query(search.text)
                 root.delegate: variantItem
+            }
+        },
+        State {
+            name: "todoist"
+
+            PropertyChanges {
+                model.values: Todoist.query(search.text)
+                root.delegate: todoistItem
+            }
+        },
+        State {
+            name: "terminal"
+
+            PropertyChanges {
+                model.values: Terminal.query(search.text)
+                root.delegate: terminalItem
             }
         }
     ]
@@ -251,6 +276,22 @@ StyledListView {
         id: variantItem
 
         VariantItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: todoistItem
+
+        TodoistItem {
+            list: root
+        }
+    }
+
+    Component {
+        id: terminalItem
+
+        TerminalItem {
             list: root
         }
     }
